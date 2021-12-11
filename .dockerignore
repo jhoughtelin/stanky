@@ -1,0 +1,14 @@
+/vendor
+/tests
+.dockerignore
+.editorconfig
+.env.example
+.gitattributes
+.gitignore
+.styleci
+artisan
+Dockerfile*
+package*.json
+phpunit.xml
+README.md
+webpack.mix.js

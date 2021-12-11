@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sed -i "s,LISTEN_PORT,$PORT,g" /etc/nginx/nginx.conf
+sed -i "s,LISTEN_PORT,${PORT:-80},g" /etc/nginx/nginx.conf
 
 php-fpm -D
 

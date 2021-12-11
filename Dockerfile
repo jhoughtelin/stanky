@@ -1,18 +1,31 @@
-FROM php:7.4-fpm-alpine
+FROM composer:latest AS vendor
+
+WORKDIR /app
+
+COPY database/factories/* database/factories/
+COPY database/seeds/* database/seeds/
+COPY composer.* ./
+
+RUN composer install \
+  --no-dev \
+  --no-interaction \
+  --prefer-dist \
+  --ignore-platform-reqs \
+  --optimize-autoloader \
+  --apcu-autoloader \
+  --ansi \
+  --no-scripts
+
+FROM php:7.4.26-fpm-alpine
 
 RUN apk add --no-cache nginx wget
 
-RUN mkdir -p /run/nginx
-
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-RUN mkdir -p /app
-COPY . /app
+WORKDIR /app
 
-RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
-RUN cd /app && \
-    /usr/local/bin/composer install --no-dev
+COPY --from=vendor /app/vendor ./vendor
 
-RUN chown -R www-data: /app
+COPY --chown=www-data:www-data . ./
 
 CMD sh /app/docker/startup.sh
