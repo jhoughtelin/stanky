@@ -16,16 +16,19 @@ RUN composer install \
   --ansi \
   --no-scripts
 
-FROM php:7.4.26-fpm-alpine
+FROM php:8.0.14-fpm-alpine3.15
 
-RUN apk add --no-cache nginx wget
+WORKDIR /var/lib/nginx/html/
 
+RUN apk add --no-cache nginx socat \
+  && rm /usr/local/etc/php-fpm.d/zz-docker.conf /etc/nginx/http.d/default.conf \
+  && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/conf.d/php.ini \
+  && touch /run/php-fpm.sock 
+
+COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-WORKDIR /app
-
 COPY --from=vendor /app/vendor ./vendor
-
 COPY --chown=www-data:www-data . ./
 
-CMD sh /app/docker/startup.sh
+CMD sh /var/lib/nginx/html/docker/startup.sh
